@@ -1,0 +1,103 @@
+---
+import { wallets, formatAddress } from '../data/wallets';
+---
+
+<ul class="wallets" data-wallets>
+  {
+    wallets.map((wallet) => (
+      <li class="wallet" data-wallet>
+        <div class="wallet-meta">
+          <div class="wallet-top">
+            <span class="wallet-name">{wallet.name}</span>
+            <span class="wallet-network">{wallet.network}</span>
+          </div>
+          <div class="wallet-status">
+            <code class="wallet-address" title={wallet.address}>
+              {formatAddress(wallet.address)}
+            </code>
+            <p class="wallet-feedback" data-feedback aria-hidden="true">
+              Copied · <strong data-network-label>{wallet.network}</strong> · thank you
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="copy-btn"
+          data-copy
+          data-address={wallet.address}
+          data-network={wallet.network}
+          aria-label={`Copy ${wallet.name} address`}
+        >
+          Copy
+        </button>
+      </li>
+    ))
+  }
+</ul>
+
+<script>
+  const RESET_MS = 2800;
+
+  const copyText = async (text: string) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand('copy');
+    document.body.removeChild(area);
+  };
+
+  const root = document.querySelector('[data-wallets]');
+  if (!root) throw new Error('Wallet list root not found');
+
+  let activeTimer: number | undefined;
+
+  root.addEventListener('click', async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+
+    const button = target.closest<HTMLButtonElement>('[data-copy]');
+    if (!button || !root.contains(button)) return;
+
+    const address = button.dataset.address;
+    const network = button.dataset.network;
+    if (!address || !network) return;
+
+    const row = button.closest<HTMLElement>('[data-wallet]');
+    if (!row) return;
+
+    try {
+      await copyText(address);
+    } catch {
+      return;
+    }
+
+    root.querySelectorAll<HTMLElement>('[data-wallet].is-copied').forEach((el) => {
+      el.classList.remove('is-copied');
+      const feedback = el.querySelector<HTMLElement>('[data-feedback]');
+      if (feedback) feedback.setAttribute('aria-hidden', 'true');
+      const copyBtn = el.querySelector<HTMLButtonElement>('[data-copy]');
+      if (copyBtn) copyBtn.textContent = 'Copy';
+    });
+
+    row.classList.add('is-copied');
+    const feedback = row.querySelector<HTMLElement>('[data-feedback]');
+    if (feedback) feedback.setAttribute('aria-hidden', 'false');
+    button.textContent = 'Copied';
+
+    window.clearTimeout(activeTimer);
+    activeTimer = window.setTimeout(() => {
+      row.classList.remove('is-copied');
+      if (feedback) feedback.setAttribute('aria-hidden', 'true');
+      button.textContent = 'Copy';
+    }, RESET_MS);
+  });
+</script>

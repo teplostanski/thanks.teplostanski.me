@@ -1,4 +1,10 @@
-export const currencies = [
+export type Wallet = {
+  name: string;
+  address: string;
+  network: string;
+};
+
+export const wallets: Wallet[] = [
   {
     name: 'Bitcoin',
     address: 'bc1pe2kt5nesxacu5q44e9c037vfzqysjq7anpvplj0genux4wdtfhas37zkrf',
@@ -31,3 +37,6 @@ export const currencies = [
     network: 'TRX',
   },
 ];
+
+export const formatAddress = (address: string, head = 6, tail = 6): string =>
+  `${address.slice(0, head)}…${address.slice(-tail)}`;

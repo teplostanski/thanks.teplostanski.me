@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WalletList from '../components/WalletList.astro';
+import { links } from '../data/links';
+---
+
+<BaseLayout>
+  <main class="page">
+    <header class="hero">
+      <h1 class="brand">Igor Teplostanski</h1>
+      <p class="lede">
+        Support my open-source projects with a crypto donation.
+      </p>
+    </header>
+
+    <section class="section" aria-labelledby="wallets-heading">
+      <h2 id="wallets-heading" class="section-label">Wallets</h2>
+      <WalletList />
+    </section>
+
+    <footer class="footer">
+      <nav class="links" aria-label="Contacts">
+        {
+          links.map((link) => (
+            <a class="link" href={link.href}>
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+      <p class="thanks">Thank you.</p>
+    </footer>
+  </main>
+</BaseLayout>
